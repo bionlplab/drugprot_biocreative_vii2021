@@ -58,6 +58,11 @@ def replace_text(text: str, offset: int, chem: bioc.BioCAnnotation, gene: bioc.B
     gene_start = gene.total_span.offset - offset
     gene_end = gene_start + gene.total_span.length
 
+    if text[chem_start:chem_end] != chem.text:
+        raise ValueError('{}: Cannot find chem {} vs {}'.format(chem.total_span.offset, text[chem_start:chem_end], chem.text))
+    if text[gene_start:gene_end] != gene.text:
+        raise ValueError('{}: Cannot find gene {} vs {}'.format(gene.total_span.offset, text[gene_start:gene_end], gene.text))
+
     if chem_start <= gene_start <= chem_end \
             or chem_start <= gene_end <= chem_end \
             or gene_start <= chem_start <= gene_end \
@@ -149,9 +154,9 @@ def create_drugprot_bert(input, output):
                 else:
                     continue
                     # cross sen
-                    relid = 'c{}.{}.{}'.format(doc.id, chem.id, gene.id)
-                    text = replace_text_passage(passage, chem, gene)
-                    cnt['cross sentence'] += 1
+                    # relid = 'c{}.{}.{}'.format(doc.id, chem.id, gene.id)
+                    # text = replace_text_passage(passage, chem, gene)
+                    # cnt['cross sentence'] += 1
 
                 labels = find_relations(passage, chem, gene)
                 if len(labels) == 0:
@@ -161,7 +166,7 @@ def create_drugprot_bert(input, output):
                         writer.writerow([relid, text, l])
                         cnt2[l] += 1
                         if '@CHEM-GENE$' in text:
-                            cnt2['@CHEM-GENE$'] += 1
+                            cnt['@CHEM-GENE$'] += 1
                     cnt['labels ' + str(len(labels))] += 1
 
     fp.close()
@@ -173,10 +178,11 @@ def create_drugprot_bert(input, output):
 
     for k in sorted(cnt2.keys()):
         print(k, cnt2[k])
+    print('Total', sum(cnt2.values()))
 
 
 if __name__ == '__main__':
     dir = Path.home() / 'Data/drugprot'
     input_dir = dir / 'bioc'
     output_dir = dir / 'bert'
-    create_drugprot_bert(input_dir / 'train_preprocessed.xml', output_dir / 'train.tsv')
+    create_drugprot_bert(input_dir / 'train_preprocessed_mergesent.xml', output_dir / 'train_mergesent.tsv')
