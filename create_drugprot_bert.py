@@ -8,40 +8,6 @@ import bioc
 
 from utils import in_one_sentence
 
-# stanza.download('en')
-# nlp = stanza.Pipeline('en')
-
-
-# def tokenize_text(text, id):
-#     sentences = []
-#     doc = nlp(text)
-#     for sent in doc.sentences:
-#         sentence = bioc.BioCSentence()
-#         sentence.infons['filename'] = id
-#         sentence.offset = sent.start_char
-#         sentence.text = text[sent.start_char:sent.end_char]
-#         sentences.append(sentence)
-#         i = 0
-#         for token in sent:
-#             for t, start, end in split_punct(token.text, token.idx):
-#                 ann = bioc.BioCAnnotation()
-#                 ann.id = f'a{i}'
-#                 ann.text = t
-#                 ann.add_location(bioc.BioCLocation(start, end-start))
-#                 sentence.add_annotation(ann)
-#                 i += 1
-#     return sentences
-#
-#
-# def find_entities(sentence, entities, entity_type):
-#     es = []
-#     for e in entities:
-#         if e['type'] != entity_type:
-#             continue
-#         if sentence.offset <= e['start'] and e['end'] <= sentence.offset + len(sentence.text):
-#             es.append(e)
-#     return es
-
 
 def find_relations(passage: bioc.BioCPassage, chem: bioc.BioCAnnotation, gene: bioc.BioCAnnotation):
     labels = []
@@ -51,7 +17,10 @@ def find_relations(passage: bioc.BioCPassage, chem: bioc.BioCAnnotation, gene: b
     return labels
 
 
-def replace_text(text: str, offset: int, chem: bioc.BioCAnnotation, gene: bioc.BioCAnnotation):
+def replace_text(sen: bioc.BioCSentence, chem: bioc.BioCAnnotation, gene: bioc.BioCAnnotation):
+    offset = sen.offset
+    text = sen.text
+
     chem_start = chem.total_span.offset - offset
     chem_end = chem_start + chem.total_span.length
 
@@ -85,50 +54,6 @@ def replace_text(text: str, offset: int, chem: bioc.BioCAnnotation, gene: bioc.B
         return before + f'@GENE$' + middle + f'@CHEMICAL$' + after
 
 
-def replace_text_passage(passage: bioc.BioCPassage, chem: bioc.BioCAnnotation, gene: bioc.BioCAnnotation):
-    start = min(chem.total_span.offset, gene.total_span.offset)
-    end = max(chem.total_span.end, gene.total_span.end)
-
-    enclose = False
-    offset = -1
-    text = ''
-    for s in passage.sentences:
-        if s.offset <= start <= s.offset + len(s.text):
-            enclose = True
-            offset = s.offset
-        if enclose:
-            text += s.text + ' '
-        if s.offset <= end <= s.offset + len(s.text):
-            enclose = False
-
-    return replace_text(text, offset, chem, gene)
-
-
-# def merge_sentences(sentences):
-#     if len(sentences) == 0:
-#         return sentences
-#
-#     new_sentences = []
-#     last_one = sentences[0]
-#     for s in sentences[1:]:
-#         if last_one.text[-1] in """.?!""" and last_one.text[-4:] != 'i.v.' and s.text[0].isupper():
-#             new_sentences.append(last_one)
-#             last_one = s
-#         else:
-#             last_one.text += ' ' * (s.offset - len(last_one.text) - last_one.offset)
-#             last_one.text += s.text
-#     new_sentences.append(last_one)
-#     return new_sentences
-
-
-def find_sentence(passage: bioc.BioCPassage, ann: bioc.BioCAnnotation):
-    total_span = ann.total_span
-    for s in passage.sentences:
-        if s.offset <= total_span.offset and total_span.end <= s.offset + len(s.text):
-            return s
-    raise KeyError()
-
-
 def create_drugprot_bert(input, output):
     with open(input, encoding='utf8') as fp:
         collection = bioc.load(fp)
@@ -149,7 +74,7 @@ def create_drugprot_bert(input, output):
                 if sentence:
                     # one sentence
                     relid = '{}.{}.{}'.format(doc.id, chem.id, gene.id)
-                    text = replace_text(sentence.text, sentence.offset, chem, gene)
+                    text = replace_text(sentence, chem, gene)
                     cnt['single sentence'] += 1
                 else:
                     continue

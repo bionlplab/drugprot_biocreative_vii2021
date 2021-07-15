@@ -12,7 +12,7 @@ def convert(abstract_file, entities_file, relation_file, output_dir):
             toks = line.strip().split('\t')
             with open(output_dir / '{}.txt'.format(toks[0]), 'w', encoding='utf8') as fp:
                 fp.write(toks[1])
-                fp.write('\n')
+                fp.write(' ')
                 fp.write(toks[2])
             docids.add(toks[0])
 
