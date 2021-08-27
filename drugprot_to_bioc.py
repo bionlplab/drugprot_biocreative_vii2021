@@ -72,29 +72,30 @@ def convert(abstract_file, entities_file, relation_file, output):
                 p.add_annotation(ann)
 
     # relations
-    rel_id = 0
-    with open(relation_file, encoding='utf8') as fp:
-        for line in tqdm.tqdm(fp, desc=relation_file.stem):
-            toks = line.strip().split('\t')
-            doc = maps[toks[0]]
-            rel = bioc.BioCRelation()
-            rel.id = 'R{}'.format(rel_id)
-            rel.infons['type'] = toks[1]
-            idx = toks[2].find(':')
-            rel.add_node(bioc.BioCNode(toks[2][idx + 1:], toks[2][:idx]))
-            idx = toks[3].find(':')
-            rel.add_node(bioc.BioCNode(toks[3][idx + 1:], toks[3][:idx]))
+    if relation_file is not None and relation_file.exists():
+        rel_id = 0
+        with open(relation_file, encoding='utf8') as fp:
+            for line in tqdm.tqdm(fp, desc=relation_file.stem):
+                toks = line.strip().split('\t')
+                doc = maps[toks[0]]
+                rel = bioc.BioCRelation()
+                rel.id = 'R{}'.format(rel_id)
+                rel.infons['type'] = toks[1]
+                idx = toks[2].find(':')
+                rel.add_node(bioc.BioCNode(toks[2][idx + 1:], toks[2][:idx]))
+                idx = toks[3].find(':')
+                rel.add_node(bioc.BioCNode(toks[3][idx + 1:], toks[3][:idx]))
 
-            # assert
-            try:
-                p = get_passage_rel(doc, rel)
-                p.add_relation(rel)
-            except:
-                print('{}: {}:{}:{}: Cannot find passage'.format(doc.id, rel.id, rel.nodes[0].refid, rel.nodes[1].refid))
-                cnt['cross passage ann'] += 1
-                exit(1)
+                # assert
+                try:
+                    p = get_passage_rel(doc, rel)
+                    p.add_relation(rel)
+                except:
+                    print('{}: {}:{}:{}: Cannot find passage'.format(doc.id, rel.id, rel.nodes[0].refid, rel.nodes[1].refid))
+                    cnt['cross passage ann'] += 1
+                    exit(1)
 
-            rel_id += 1
+                rel_id += 1
 
     for k, v in cnt.most_common():
         print(k, v)
@@ -105,7 +106,7 @@ def convert(abstract_file, entities_file, relation_file, output):
 
 if __name__ == '__main__':
     dir = Path.home() / 'Data/drugprot'
-    data_dir = dir / 'drugprot-gs-training-development'
+    data_dir = dir / 'drugprot-gs'
     output_dir = dir / 'bioc'
 
     # convert(data_dir / 'training/drugprot_training_abstracs.tsv',
@@ -113,7 +114,13 @@ if __name__ == '__main__':
     #         data_dir / 'training/drugprot_training_relations.tsv',
     #         output_dir / 'train.xml')
 
-    convert(data_dir / 'development/drugprot_development_abstracs.tsv',
-            data_dir / 'development/drugprot_development_entities.tsv',
-            data_dir / 'development/drugprot_development_relations.tsv',
-            output_dir / 'development.xml')
+    # convert(data_dir / 'development/drugprot_development_abstracs.tsv',
+    #         data_dir / 'development/drugprot_development_entities.tsv',
+    #         data_dir / 'development/drugprot_development_relations.tsv',
+    #         output_dir / 'development.xml')
+
+    convert(data_dir / 'test-background/test_background_abstracts.tsv',
+            data_dir / 'test-background/test_background_entities.tsv',
+            None,
+            output_dir / 'test-background.xml')
+

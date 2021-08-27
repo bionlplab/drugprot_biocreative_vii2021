@@ -1,7 +1,17 @@
+"""
+Usage:
+    script <input> <output>
+"""
+import os
+import zipfile
 from pathlib import Path
+from zipfile import ZipFile
 
 import bioc
+import docopt
 import tqdm
+
+from utils import FileLock, bioc_load_zip, bioc_dump_zip
 
 
 def should_merge(sent):
@@ -52,20 +62,42 @@ def merge_sentences(collection: bioc.BioCCollection):
             passage.sentences = new_sentences
 
 
+def merge_sentences_file(input, output):
+    input = Path(input)
+    output = Path(output)
+
+    lck = FileLock(output)
+    if lck.exists():
+        return
+
+    with lck:
+        print('Read {}'.format(input.name))
+        if str(input).endswith('.zip'):
+            with ZipFile(input) as myzip:
+                collection = bioc_load_zip(myzip)
+        else:
+            with open(input, encoding='utf8') as fp:
+                collection = bioc.load(fp)
+
+        merge_sentences(collection)
+
+        if str(output).endswith('.zip'):
+            with ZipFile(output, mode='w', compression=zipfile.ZIP_DEFLATED) as myzip:
+                bioc_dump_zip(collection, myzip)
+        else:
+            with open(output, 'w', encoding='utf8') as fp:
+                bioc.dump(collection, fp)
+
+
 if __name__ == '__main__':
-    dir = Path.home() / 'Data/drugprot'
-    data_dir = dir / 'bioc'
+    argv = docopt.docopt(__doc__)
+    merge_sentences_file(argv['<input>'], argv['<output>'])
 
-    # with open(data_dir / 'train_preprocessed.xml', encoding='utf8') as fp:
-    #     collection = bioc.load(fp)
-    # with open(data_dir / 'train_preprocessed.xml', 'w', encoding='utf8') as fp:
-    #     bioc.dump(collection, fp)
+    # dir = Path.home() / 'Data/drugprot'
+    # data_dir = dir / 'bioc'
 
-    input = data_dir / 'train_preprocessed.xml'
-    with open(input, encoding='utf8') as fp:
-        collection = bioc.load(fp)
+    # merge_sentences_file(data_dir / 'train_preprocessed.xml',
+    #                      data_dir / 'train_preprocessed_mergesent.xml')
 
-    merge_sentences(collection)
-    input = data_dir / 'train_preprocessed_mergesent.xml'
-    with open(input, 'w', encoding='utf8') as fp:
-        bioc.dump(collection, fp)
+    # merge_sentences_file(data_dir / 'test-background_preprocessed.xml',
+    #                      data_dir / 'test-background_preprocessed_mergesent.xml')

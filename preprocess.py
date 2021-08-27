@@ -1,10 +1,18 @@
+"""
+Usage:
+    script <input> <output>
+"""
 import logging
+import os
 from pathlib import Path
 
 import bioc
+import docopt
 import stanza
 import tqdm
 from bioc import BioCPassage, BioCSentence, BioCAnnotation, BioCRelation, BioCNode, BioCLocation
+
+from utils import FileLock
 
 
 class BioCStanza:
@@ -13,7 +21,11 @@ class BioCStanza:
 
     def process_passage(self, passage: BioCPassage, docid: str = None) -> BioCPassage:
         text = passage.text
-        doc = self.nlp(text)
+
+        try:
+            doc = self.nlp(text)
+        except:
+            return passage
 
         del passage.sentences[:]
         for sent in doc.sentences:
@@ -55,27 +67,40 @@ class BioCStanza:
 
 
 def preprocess(input, output):
-    nlp = stanza.Pipeline('en', processors='tokenize,pos,lemma,depparse')
-    processor = BioCStanza(nlp)
+    lck = FileLock(output)
+    if lck.exists():
+        return
 
-    with open(input, encoding='utf8') as fp:
-        collection = bioc.load(fp)
+    with lck:
+        nlp = stanza.Pipeline('en', processors='tokenize,pos,lemma,depparse')
+        processor = BioCStanza(nlp)
 
-    itr = bioc.BioCXMLDocumentWriter(str(output))
-    itr.write_collection_info(collection)
-    for doc in tqdm.tqdm(collection.documents):
-        for passage in doc.passages:
-            processor.process_passage(passage, docid=doc.id)
-        itr.write_document(doc)
-    itr.close()
+        with open(input, encoding='utf8') as fp:
+            collection = bioc.load(fp)
 
-    # with open(output, 'w', encoding='utf8') as fp:
-    #     bioc.dump(collection, fp)
+        itr = bioc.BioCXMLDocumentWriter(str(output))
+        itr.write_collection_info(collection)
+        for doc in tqdm.tqdm(collection.documents):
+            for passage in doc.passages:
+                processor.process_passage(passage, docid=doc.id)
+            itr.write_document(doc)
+        itr.close()
+
+
+def process_cmd():
+    argv = docopt.docopt(__doc__)
+    print(argv)
+    preprocess(argv['<input>'], argv['<output>'])
+
+
+def process_file():
+    dir = Path.home() / 'Data/drugprot'
+    data_dir = dir / 'bioc'
+    # preprocess(data_dir / 'train.xml', data_dir / 'train_preprocessed.xml')
+    # preprocess(data_dir / 'development.xml', data_dir / 'development_preprocessed.xml')
+    preprocess(data_dir / 'test-background.xml', data_dir / 'test-background_preprocessed.xml')
 
 
 if __name__ == '__main__':
     stanza.download()
-    dir = Path.home() / 'Data/drugprot'
-    data_dir = dir / 'bioc'
-    # preprocess(data_dir / 'train.xml', data_dir / 'train_preprocessed.xml')
-    preprocess(data_dir / 'development.xml', data_dir / 'development_preprocessed.xml')
+    process_cmd()

@@ -1,12 +1,20 @@
-import collections
+"""
+Usage:
+    script <input> <output>
+"""
+
 import csv
 import itertools
+import os.path
+import tempfile
 from pathlib import Path
+from zipfile import ZipFile
 
+import docopt
 import tqdm
 import bioc
 
-from utils import in_one_sentence
+from utils import in_one_sentence, ExtendedCounter, FileLock, bioc_reader_zip
 
 
 def find_relations(passage: bioc.BioCPassage, chem: bioc.BioCAnnotation, gene: bioc.BioCAnnotation):
@@ -55,59 +63,74 @@ def replace_text(sen: bioc.BioCSentence, chem: bioc.BioCAnnotation, gene: bioc.B
 
 
 def create_drugprot_bert(input, output):
-    with open(input, encoding='utf8') as fp:
-        collection = bioc.load(fp)
+    input = Path(input)
+    output = Path(output)
 
-    cnt = collections.Counter()
-    cnt2 = collections.Counter()
+    lck = FileLock(output)
+    if lck.exists():
+        return
 
-    fp = open(output, 'w', encoding='utf8')
-    writer = csv.writer(fp, delimiter='\t', lineterminator='\n')
-    writer.writerow(['index', 'sentence', 'label'])
-    for doc in tqdm.tqdm(collection.documents):
-        for passage in doc.passages:
-            chemicals = [ann for ann in passage.annotations if ann.infons['type'].startswith('CHEMICAL')]
-            genes = [ann for ann in passage.annotations if ann.infons['type'].startswith('GENE')]
-            for i, (chem, gene) in enumerate(itertools.product(chemicals, genes)):
-                # sentence
-                sentence = in_one_sentence(passage, chem, gene)
-                if sentence:
-                    # one sentence
-                    relid = '{}.{}.{}'.format(doc.id, chem.id, gene.id)
-                    text = replace_text(sentence, chem, gene)
-                    cnt['single sentence'] += 1
-                else:
-                    continue
-                    # cross sen
-                    # relid = 'c{}.{}.{}'.format(doc.id, chem.id, gene.id)
-                    # text = replace_text_passage(passage, chem, gene)
-                    # cnt['cross sentence'] += 1
+    with lck:
+        if str(input).endswith('.zip'):
+            reader = bioc_reader_zip(input)
+        else:
+            reader = bioc.BioCXMLDocumentReader(str(input))
 
-                labels = find_relations(passage, chem, gene)
-                if len(labels) == 0:
-                    writer.writerow([relid, text, 'False'])
-                else:
-                    for l in labels:
-                        writer.writerow([relid, text, l])
-                        cnt2[l] += 1
-                        if '@CHEM-GENE$' in text:
-                            cnt['@CHEM-GENE$'] += 1
-                    cnt['labels ' + str(len(labels))] += 1
+        cnt = ExtendedCounter()
 
-    fp.close()
+        fp = open(output, 'w', encoding='utf8')
+        writer = csv.writer(fp, delimiter='\t', lineterminator='\n')
+        writer.writerow(['index', 'sentence', 'label'])
+        for doc in tqdm.tqdm(reader):
+            for passage in doc.passages:
+                chemicals = [ann for ann in passage.annotations if ann.infons['type'].startswith('CHEMICAL')]
+                genes = [ann for ann in passage.annotations if ann.infons['type'].startswith('GENE')]
+                for i, (chem, gene) in enumerate(itertools.product(chemicals, genes)):
+                    # sentence
+                    sentence = in_one_sentence(passage, chem, gene)
+                    if sentence:
+                        # one sentence
+                        relid = '{}.{}.{}'.format(doc.id, chem.id, gene.id)
+                        text = replace_text(sentence, chem, gene)
+                        cnt[1]['single sentence'] += 1
+                    else:
+                        continue
+                        # cross sen
+                        # relid = 'c{}.{}.{}'.format(doc.id, chem.id, gene.id)
+                        # text = replace_text_passage(passage, chem, gene)
+                        # cnt['cross sentence'] += 1
 
-    for k in sorted(cnt.keys()):
-        print(k, cnt[k])
+                    labels = find_relations(passage, chem, gene)
+                    if len(labels) == 0:
+                        writer.writerow([relid, text, 'False'])
+                    else:
+                        for l in labels:
+                            writer.writerow([relid, text, l])
+                            cnt[2][l] += 1
+                            if '@CHEM-GENE$' in text:
+                                cnt['@CHEM-GENE$'] += 1
+                        cnt[1]['labels ' + str(len(labels))] += 1
 
-    print()
+        fp.close()
+        # reader.close()
 
-    for k in sorted(cnt2.keys()):
-        print(k, cnt2[k])
-    print('Total', sum(cnt2.values()))
+        cnt.pretty_print()
 
 
-if __name__ == '__main__':
+def process_cmd():
+    argv = docopt.docopt(__doc__)
+    print(argv)
+    create_drugprot_bert(argv['<input>'], argv['<output>'])
+
+
+def process_file():
     dir = Path.home() / 'Data/drugprot'
     input_dir = dir / 'bioc'
     output_dir = dir / 'bert'
-    create_drugprot_bert(input_dir / 'train_preprocessed_mergesent.xml', output_dir / 'train_mergesent.tsv')
+    # create_drugprot_bert(input_dir / 'train_preprocessed_mergesent.xml', output_dir / 'train_mergesent.tsv')
+    create_drugprot_bert(input_dir / 'test-background_preprocessed_mergesent.xml',
+                         output_dir / 'test-background_mergesent.tsv')
+
+
+if __name__ == '__main__':
+    process_cmd()

@@ -4,14 +4,7 @@ from pathlib import Path
 import bioc
 import tqdm
 
-from utils import in_one_sentence
-
-
-def find_ann(annotations, id):
-    for ann in annotations:
-        if ann.id == id:
-            return ann
-    raise KeyError('{}: Cannot find ann'.format(id))
+from utils import in_one_sentence, find_ann
 
 
 def check_entity_types(collection: bioc.BioCCollection):
