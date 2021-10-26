@@ -20,9 +20,17 @@ Our system obtained 0.7708 in precision and 0.7770 in recall, for an F1 score of
 | 4   | Majority Voting                | 0.7721    | 0.7750 | 0.7736   |
 | 5   | BioM-ELECTRA_L                 | 0.7548    | 0.7747 | 0.7647   |
 
-### How to use
+### Get started
 
-#### Preprocess data
+#### Installing from source
+
+```bash
+$ git clone https://github.com/bionlplab/drugprot_bcvii/
+$ cd /path/to/drugprot_bcvii
+$ pip install -r requirements.txt
+```
+
+#### Prepare the dataset
 
 #### Fine-tune individual models
 
