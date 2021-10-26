@@ -22,7 +22,8 @@
 #SBATCH --error="slurm-%x-%A.err.txt"
 export PYTHONPATH=.
 
-cd /home/yip4002/Subjects/drugprot_bcvii || exit
-. /home/yip4002/Subjects/venvs/wcm/bin/activate
+top_dir=$HOME
+cd $top_dir/drugprot_bcvii || exit
+. $top_dir/venvs/wcm/bin/activate
 
 python create_drugprot_bert2.py "$1" "$2"

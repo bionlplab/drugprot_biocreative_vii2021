@@ -1,6 +1,7 @@
 #! /bin/bash -l
 
-data_dir=/home/yip4002/Data/drugprot/large-scale-drugprot
+top_dir=$HOME
+data_dir=$top_dir/drugprot/large-scale-drugprot
 for file in "$data_dir"/mergesent/*.zip; do
     if test -f "$file"; then
 #        echo "$file"
