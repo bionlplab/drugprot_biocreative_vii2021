@@ -22,7 +22,7 @@ Our system obtained 0.7708 in precision and 0.7770 in recall, for an F1 score of
 
 ### Get started
 
-#### Installing from source
+#### Install from source
 
 ```bash
 $ git clone https://github.com/bionlplab/drugprot_bcvii/
