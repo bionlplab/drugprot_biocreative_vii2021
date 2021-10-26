@@ -22,6 +22,12 @@ Our system obtained 0.7708 in precision and 0.7770 in recall, for an F1 score of
 
 ### How to use
 
+#### Preprocess data
+
+#### Fine-tune individual models
+
+#### Train ensemble models
+
 ### How to cite this work
 
     Karabulut ME, Vijay-Shanker K, Peng Y.
