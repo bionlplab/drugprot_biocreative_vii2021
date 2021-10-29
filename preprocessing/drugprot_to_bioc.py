@@ -3,6 +3,7 @@ from pathlib import Path
 
 import bioc
 import tqdm
+import os
 
 
 def get_passage_ann(doc: bioc.BioCDocument, ann: bioc.BioCAnnotation) -> bioc.BioCPassage:
@@ -105,22 +106,25 @@ def convert(abstract_file, entities_file, relation_file, output):
 
 
 if __name__ == '__main__':
-    dir = Path.home() / 'Data/drugprot'
-    data_dir = dir / 'drugprot-gs'
-    output_dir = dir / 'bioc'
+    #dir = Path.home() / 'Data/drugprot'
+    data_dir = Path(os.path.join(os.path.abspath(os.curdir), 'drugprot-gs'))
+    output_dir = Path(os.path.join(os.path.abspath(os.curdir), 'bioc'))
 
-    # convert(data_dir / 'training/drugprot_training_abstracs.tsv',
-    #         data_dir / 'training/drugprot_training_entities.tsv',
-    #         data_dir / 'training/drugprot_training_relations.tsv',
-    #         output_dir / 'train.xml')
+    if not os.path.exists(output_dir):
+        os.makedirs(output_dir)
+        
+    convert(data_dir / 'training/drugprot_training_abstracs.tsv',
+            data_dir / 'training/drugprot_training_entities.tsv',
+            data_dir / 'training/drugprot_training_relations.tsv',
+            output_dir / 'train.xml')
 
-    # convert(data_dir / 'development/drugprot_development_abstracs.tsv',
-    #         data_dir / 'development/drugprot_development_entities.tsv',
-    #         data_dir / 'development/drugprot_development_relations.tsv',
-    #         output_dir / 'development.xml')
+    convert(data_dir / 'development/drugprot_development_abstracs.tsv',
+            data_dir / 'development/drugprot_development_entities.tsv',
+            data_dir / 'development/drugprot_development_relations.tsv',
+            output_dir / 'development.xml')
 
-    convert(data_dir / 'test-background/test_background_abstracts.tsv',
-            data_dir / 'test-background/test_background_entities.tsv',
-            None,
-            output_dir / 'test-background.xml')
+    #convert(data_dir / 'test-background/test_background_abstracts.tsv',
+            #data_dir / 'test-background/test_background_entities.tsv',
+            #None,
+            #output_dir / 'test-background.xml')
 
