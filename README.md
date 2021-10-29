@@ -32,6 +32,18 @@ $ pip install -r requirements.txt
 
 #### Prepare the dataset
 
+After downloading the Drugprot dataset (entities, relations and abstracts files), create a folder ```drugprot-gs``` under the root project directory and unzip the dataset in that folder.
+
+Run the preprocessing script as:
+
+```
+chmod +x scripts/preprocess.sh
+./scripts/preprocess.sh
+```
+
+This script will create two folders ```drugprot_data``` and ```drugprot_data_tag2``` which contain the BERT input data ```train.tsv```, ```dev.tsv```, ```test.tsv```
+corresponding to the two different tagging mechanism, respectively, as described in the paper. 
+
 #### Fine-tune individual models
 
 #### Train ensemble models
