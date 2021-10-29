@@ -108,7 +108,7 @@ def create_drugprot_bert(input, output):
                             writer.writerow([relid, text, l])
                             cnt[2][l] += 1
                             if '@CHEM-GENE$' in text:
-                                cnt['@CHEM-GENE$'] += 1
+                                cnt[1]['@CHEM-GENE$'] += 1
                         cnt[1]['labels ' + str(len(labels))] += 1
 
         fp.close()
