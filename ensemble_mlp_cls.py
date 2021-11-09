@@ -145,18 +145,18 @@ def evaluation(model, model_path, test_loader, device):
 
 def main(args):
 
-    train_data_1 = os.path.join(args.data_path_1, 'preds_train_cls_ensemble/test_feature.tsv')
-    train_data_2 = os.path.join(args.data_path_2, 'preds_train_cls_ensemble/test_feature.tsv')
-    train_data_3 = os.path.join(args.data_path_3, 'preds_train_cls_ensemble/test_feature.tsv')
-    train_data_4 = os.path.join(args.data_path_4, 'preds_train_cls_ensemble/test_feature.tsv')
-    train_data_5 = os.path.join(args.data_path_5, 'preds_train_cls_ensemble/test_feature.tsv')
+    train_data_1 = os.path.join(args.data_path_1, 'test_feature.tsv')
+    train_data_2 = os.path.join(args.data_path_2, 'test_feature.tsv')
+    train_data_3 = os.path.join(args.data_path_3, 'test_feature.tsv')
+    train_data_4 = os.path.join(args.data_path_4, 'test_feature.tsv')
+    train_data_5 = os.path.join(args.data_path_5, 'test_feature.tsv')
     train_gt = os.path.join(args.gt_path, 'train.tsv')
 
-    test_data_1 = os.path.join(args.data_path_1, 'preds_gold_cls_ensemble/test_feature.tsv')
-    test_data_2 = os.path.join(args.data_path_2, 'preds_gold_cls_ensemble/test_feature.tsv')
-    test_data_3 = os.path.join(args.data_path_3, 'preds_gold_cls_ensemble/test_feature.tsv')
-    test_data_4 = os.path.join(args.data_path_4, 'preds_gold_cls_ensemble/test_feature.tsv')
-    test_data_5 = os.path.join(args.data_path_5, 'preds_gold_cls_ensemble/test_feature.tsv')
+    test_data_1 = os.path.join(args.data_path_1, 'test_feature.tsv')
+    test_data_2 = os.path.join(args.data_path_2, 'test_feature.tsv')
+    test_data_3 = os.path.join(args.data_path_3, 'test_feature.tsv')
+    test_data_4 = os.path.join(args.data_path_4, 'test_feature.tsv')
+    test_data_5 = os.path.join(args.data_path_5, 'test_feature.tsv')
     test_gt = os.path.join(args.gt_path, 'test.tsv')
 
     model_path = os.path.join(args.out_path, 'ensemble_cpkt.pth')
