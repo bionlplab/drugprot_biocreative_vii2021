@@ -1,3 +1,7 @@
 tqdm
 bioc
 docopt
+stanza
+tensorflow-gpu==1.15.2
+sklearn
+numpy==1.19.5
