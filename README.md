@@ -46,6 +46,26 @@ corresponding to the two different tagging mechanism, respectively, as described
 
 #### Fine-tune individual models
 
+You can find the pretrained models:
+BioBERT: https://drive.google.com/drive/u/0/folders/1RjwQ2rgAm6W1phMJP5d1YZGMIL2dEJNX
+PubMedBERT: https://drive.google.com/drive/u/0/folders/1tQFu0O0fCyZkX6WnvIphtuoGfzQz3lj6
+
+After downloading one of the pre-trained weights, unpack it to any directory you want and change the ```PRETRAIN_DIR``` variable in ```run_finetuning.sh``` file accordingly.
+We fine-tuned BioBERT and PubMedBERT on GeForce RTX 2080 Ti. Since BioM-ELECTRAL is a large model, we fine-tuned it in google colab using their free gpu/tpu service. Colab notebook for fine-tuning of BioM-ELECTRAL will be provided soon.
+
+Update the ```DATA_DIR``` in ```run_finetuning.sh``` to indicate a folder with BERT input data. ```-output_feature=true``` writes [CLS] predictions in the output directory set.
+
+Set ```BERT_MODEL``` variable to ```original``` to have default LM head in the BERT. Set it to ```attention_last_layer``` to add attention layer on the last layer. Set it to ```lstm_last_layer``` to add LSTM layer on the last layer. 
+
+
+Default parameters will allow you fine-tune PubMedBERT with good set of parameters. 
+
+Run the finetuning script as:
+```
+chmod +x run_finetuning.sh
+./run_finetuning.sh
+```
+
 #### Train ensemble models
 
 ### How to cite this work
