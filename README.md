@@ -47,7 +47,9 @@ corresponding to the two different tagging mechanism, respectively, as described
 #### Fine-tune individual models
 
 You can find the pretrained models:
+
 BioBERT: https://drive.google.com/drive/u/0/folders/1RjwQ2rgAm6W1phMJP5d1YZGMIL2dEJNX
+
 PubMedBERT: https://drive.google.com/drive/u/0/folders/1tQFu0O0fCyZkX6WnvIphtuoGfzQz3lj6
 
 After downloading one of the pre-trained weights, unpack it to any directory you want and change the ```PRETRAIN_DIR``` variable in ```run_finetuning.sh``` file accordingly.
