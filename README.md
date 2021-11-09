@@ -53,12 +53,13 @@ BioBERT: https://drive.google.com/drive/u/0/folders/1RjwQ2rgAm6W1phMJP5d1YZGMIL2
 PubMedBERT: https://drive.google.com/drive/u/0/folders/1tQFu0O0fCyZkX6WnvIphtuoGfzQz3lj6
 
 After downloading one of the pre-trained weights, unpack it to any directory you want and change the ```PRETRAIN_DIR``` variable in ```run_finetuning.sh``` file accordingly.
-We fine-tuned BioBERT and PubMedBERT on GeForce RTX 2080 Ti. Since BioM-ELECTRAL is a large model, we fine-tuned it in google colab using their free gpu/tpu service. Colab notebook for fine-tuning of BioM-ELECTRAL will be provided soon.
+We fine-tuned BioBERT and PubMedBERT on GeForce RTX 2080 Ti. Since BioM-ELECTRAL is a large model, we fine-tuned it using Google Colab's free gpu/tpu service. Colab notebook for fine-tuning of BioM-ELECTRAL will be provided soon.
 
-Update the ```DATA_DIR``` in ```run_finetuning.sh``` to indicate a folder with BERT input data. ```-output_feature=true``` writes [CLS] predictions in the output directory set.
+Update the ```DATA_DIR``` in ```run_finetuning.sh``` to indicate a folder with BERT input data. ```--output_feature=true``` flag allows model to write [CLS] predictions in the output directory set.
 
 Set ```BERT_MODEL``` variable to ```original``` to have default LM head in the BERT. Set it to ```attention_last_layer``` to add attention layer on the last layer. Set it to ```lstm_last_layer``` to add LSTM layer on the last layer. 
 
+You can experiment with the class weights in the class-weighted loss function in the ```create_model``` method of ```run_re.py``` script.
 
 Default parameters will allow you fine-tune PubMedBERT with good set of parameters. 
 
@@ -70,11 +71,17 @@ chmod +x run_finetuning.sh
 
 #### Train ensemble models
 
+Ensemble models are developed with Pytorch. You can install pytorch with pip
+
+```pip install torch==1.7.1+cu101 torchvision==0.8.2+cu101 torchaudio==0.7.2 -f https://download.pytorch.org/whl/torch_stable.html```
+
 Fine-tuning any BERT model provides softmax outputs (probabilities for 14 classes) in a file ```test_features.tsv```. ```majority_voting.py``` expects five input directories with probability files, and an output directory to write the output probability file. Replace indir1 to indir 5 with actual directory names.
 
 ```
 python majority_voting.py -d1 indir1 -d2 indir2 -d3 indir3 -d4 indir4 -d5 indir5 -o outdir
 ```
+
+```ensemble_mlp_cls.py``` shows to training of mlp with the ensemble of five [CLS] token extracted from five individual models. Reserved ensemble training data/validation data and five model predictions [CLS] are given as input to the script. 
 
 ### How to cite this work
 
