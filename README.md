@@ -70,6 +70,12 @@ chmod +x run_finetuning.sh
 
 #### Train ensemble models
 
+Fine-tuning any BERT model provides softmax outputs (probabilities for 14 classes) in a file ```test_features.tsv```. ```majority_voting.py``` expects five input directories with probability files, and an output directory to write the output probability file. Replace indir1 to indir 5 with actual directory names.
+
+```
+python majority_voting.py -d1 indir1 -d2 indir2 -d3 indir3 -d4 indir4 -d5 indir5 -o outdir
+```
+
 ### How to cite this work
 
     Karabulut ME, Vijay-Shanker K, Peng Y.
