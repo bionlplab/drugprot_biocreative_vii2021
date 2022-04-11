@@ -4,4 +4,4 @@ docopt
 stanza
 tensorflow-gpu==2.5.3
 sklearn
-numpy==1.19.5
+numpy==1.21.0
