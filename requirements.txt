@@ -2,6 +2,6 @@ tqdm
 bioc
 docopt
 stanza
-tensorflow-gpu==1.15.2
+tensorflow-gpu==2.5.3
 sklearn
 numpy==1.19.5
